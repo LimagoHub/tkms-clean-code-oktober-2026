@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import pdfplumber; pdf = pdfplumber.open\\(''''C:/Users/JoachimWagner/Documents/git/Atlas/cleancode/atlas-clean-code-maerz-2026/ProperitaererThreadPool/A_C17_Thread_Pool_for_High-Performance_Scientific_.pdf''''\\); [print\\(p.extract_text\\(\\)\\) for p in pdf.pages]\")",
+      "Bash(python -c \"import PyPDF2; r=PyPDF2.PdfReader\\(''''C:/Users/JoachimWagner/Documents/git/Atlas/cleancode/atlas-clean-code-maerz-2026/ProperitaererThreadPool/A_C17_Thread_Pool_for_High-Performance_Scientific_.pdf''''\\); [print\\(p.extract_text\\(\\)\\) for p in r.pages]\")",
+      "Bash(pip install:*)",
+      "Bash(python -c \":*)"
+    ]
+  }
+}
