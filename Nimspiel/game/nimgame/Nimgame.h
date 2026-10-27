@@ -26,7 +26,7 @@ namespace game::nimgame {
 
     protected:
         auto isGameOver() const noexcept -> bool override {
-            return getBoard() < 1;
+            return getBoard() < 1 || getPlayers().empty();
         }
 
         auto updateBoard()  noexcept -> void override {
@@ -36,8 +36,8 @@ namespace game::nimgame {
         auto isTurnValid() const noexcept -> bool override {
             return getMove() >= 1 && getMove() <= 3;
         }
-        void prepare() override {
-            write(get_current_player()->getName() + " ist am Zug");
+        auto prepare() -> void override {
+            write(getCurrentPlayer()->getName() + " ist am Zug");
         }
 
     };

@@ -10,6 +10,7 @@ add_executable(Nimspiel main.cpp
         game/nimgame/player/AbstractNimgamePlayer.h
         game/nimgame/player/HumanPlayer.h
         game/nimgame/player/ComputerPlayer.h
+        game/nimgame/player/GrandmaPlayer.h
         io/ConsoleWriter.h
         game/player/IPlayer.h
         game/player/AbstractPlayer.h

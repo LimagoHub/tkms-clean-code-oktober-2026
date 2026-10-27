@@ -31,7 +31,7 @@ namespace game {
         auto addPlayer(PlayerPointer player) -> void { players_.push_back(std::move(player)); }
 
 
-        auto removePlayer(PlayerPointer player) -> void {
+        auto removePlayer([[maybe_unused]]PlayerPointer player) -> void {
             // TODO implement later
 
         }
@@ -49,7 +49,7 @@ namespace game {
 
         auto playRound() noexcept -> void {
             for (auto &player : players_) {
-                set_current_player( player.get());
+                setCurrentPlayer( player.get());
                 playersTurn();
             }
 
@@ -78,14 +78,14 @@ namespace game {
         }
 
         auto askForMove() noexcept -> void {
-            setMove(get_current_player()->makeTurn(getBoard()));
+            setMove(getCurrentPlayer()->makeTurn(getBoard()));
             reportIfMoveInvalid();
         }
 
         // Operation
         auto displayLossMessage() const noexcept -> void {
             if (isGameOver()) {
-                write(get_current_player()->getName() + " hat verloren");
+                write(getCurrentPlayer()->getName() + " hat verloren");
 
             }
         }
@@ -95,14 +95,14 @@ namespace game {
             if (! isTurnValid()) write ("Ungueltige Eingabe.") ;
         }
 
-        void set_current_player(::game::AbstractGame<BOARD, MOVE>::Player *current_player) {
-            currentPlayer_ = current_player;
+        auto setCurrentPlayer(Player *currentPlayer) -> void {
+            currentPlayer_ = currentPlayer;
         }
 
 
     protected:
 
-        virtual void prepare() {
+        virtual auto prepare() -> void {
             // Ok
         }
 
@@ -132,13 +132,13 @@ namespace game {
         }
 
 
-        [[nodiscard]] ::game::AbstractGame<BOARD, MOVE>::Player * get_current_player() const {
+        [[nodiscard]] auto getCurrentPlayer() const -> Player * {
             return currentPlayer_;
         }
 
-        virtual auto isGameOver() const noexcept  -> bool = 0;
+        [[nodiscard]] virtual auto isGameOver() const noexcept  -> bool = 0;
         virtual auto updateBoard()  noexcept -> void = 0;
-        virtual auto isTurnValid   () const noexcept -> bool = 0;
+        [[nodiscard]] virtual auto isTurnValid   () const noexcept -> bool = 0;
 
     };
 }
