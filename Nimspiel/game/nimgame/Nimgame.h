@@ -3,14 +3,16 @@
 //
 
 #pragma once
+#include <iostream>
+#include <string>
 #include "../IGame.h"
 
 namespace game::nimgame {
     class Nimgame : public IGame{
 
     public:
-        Nimgame(){
-            stones = 23;
+        Nimgame() noexcept {
+            stones_ = 23;
 
         }
         auto play() noexcept -> void override{
@@ -20,27 +22,43 @@ namespace game::nimgame {
         }
 
     private:
-        int stones;
-        int turn{0};
+        int stones_;
+        int turn_{0};
 
         auto playTurn() noexcept -> void {
-            playerTurn();
+            playersTurn();
             computerTurn();
         }
 
-        auto playerTurn() noexcept -> void {
+
+
+        auto playersTurn() noexcept -> void {
 
             if (isGameOver()) return;
-
-
-            while (true) {
-                std::cout << "Es gibt " << stones << " Steine. Bitte nehmen Sie 1,2 oder 3 Steine: ";
-                std::cin >> turn;
-                if (turn >= 1 && turn <= 3)break;
-                std::cout << "Ungueltige Eingabe." << std::endl;
-
-            }
+            processPlayerTurn();
             terminateTurn( "Spieler");
+        }
+
+        auto processPlayerTurn() noexcept-> void {
+
+            do {
+                askForMove();
+            } while (!isTurnValid());
+
+        }
+
+        auto askForMove() noexcept -> void {
+            concretePlayerTurn();
+            reportIfMoveInvalid();
+        }
+
+        auto concretePlayerTurn() noexcept -> void {
+            std::cout << "Es gibt " << stones_ << " Steine. Bitte nehmen Sie 1,2 oder 3 Steine: ";
+            std::cin >> turn_;
+        }
+
+        auto reportIfMoveInvalid() const noexcept -> void {
+            if (! isTurnValid()) std::cout << "Ungueltige Eingabe." << std::endl;
         }
 
 
@@ -50,8 +68,8 @@ namespace game::nimgame {
 
 
             const int zuege[] = {3,1,1,2};
-            turn = zuege[stones % 4];
-            std::cout << "Der Computer nimmt " << turn << " Steine." << std::endl;
+            turn_ = zuege[stones_ % 4];
+            std::cout << "Der Computer nimmt " << turn_ << " Steine." << std::endl;
 
 
 
@@ -62,27 +80,31 @@ namespace game::nimgame {
 
 
         // Integration
-        void terminateTurn( std::string message) {
+        auto terminateTurn(const std::string& message) noexcept -> void {
             updateBoard();
-            display_loss_message(message);
+            displayLossMessage(message);
         }
 
 
         // Operation
-        void display_loss_message(std::string message) {
+        auto displayLossMessage(const std::string& message) const noexcept -> void {
             if (isGameOver()) {
                 std::cout << message << " hat verloren" << std::endl;
             }
         }
-// ----- Impementierungssumpf --------------------------
+// ----- Implementierungssumpf --------------------------
 
-        void updateBoard() {
-            stones -= turn;
+        auto updateBoard() noexcept -> void {
+            stones_ -= turn_;
         }
 
 
         auto isGameOver() const noexcept -> bool {
-            return stones < 1;
+            return stones_ < 1;
+        }
+
+        auto isTurnValid() const noexcept -> bool {
+            return turn_ >= 1 && turn_ <= 3;
         }
     };
 }
