@@ -5,106 +5,40 @@
 #pragma once
 #include <iostream>
 #include <string>
-#include "../IGame.h"
+#include <memory>
+#include <vector>
+
+#include "../../io/IWriter.h"
+#include "../AbstractGame.h"
+
 
 namespace game::nimgame {
-    class Nimgame : public IGame{
+    class Nimgame : public AbstractGame<int,int>{
+        using Writer = std::unique_ptr<io::IWriter>;
 
     public:
-        Nimgame() noexcept {
-            stones_ = 23;
-
-        }
-        auto play() noexcept -> void override{
-            while (! isGameOver()) {
-                playTurn();
-            }
-        }
-
-    private:
-        int stones_;
-        int turn_{0};
-
-        auto playTurn() noexcept -> void {
-            playersTurn();
-            computerTurn();
-        }
-
-
-
-        auto playersTurn() noexcept -> void {
-
-            if (isGameOver()) return;
-            processPlayerTurn();
-            terminateTurn( "Spieler");
-        }
-
-        auto processPlayerTurn() noexcept-> void {
-
-            do {
-                askForMove();
-            } while (!isTurnValid());
+        Nimgame(Writer writer): AbstractGame(std::move(writer)) {
+            setBoard(23);
 
         }
 
-        auto askForMove() noexcept -> void {
-            concretePlayerTurn();
-            reportIfMoveInvalid();
-        }
-
-        auto concretePlayerTurn() noexcept -> void {
-            std::cout << "Es gibt " << stones_ << " Steine. Bitte nehmen Sie 1,2 oder 3 Steine: ";
-            std::cin >> turn_;
-        }
-
-        auto reportIfMoveInvalid() const noexcept -> void {
-            if (! isTurnValid()) std::cout << "Ungueltige Eingabe." << std::endl;
-        }
-
-
-
-        auto computerTurn() noexcept -> void {
-            if (isGameOver()) return;
-
-
-            const int zuege[] = {3,1,1,2};
-            turn_ = zuege[stones_ % 4];
-            std::cout << "Der Computer nimmt " << turn_ << " Steine." << std::endl;
-
-
-
-            terminateTurn( "Computer");
-        }
-
-
-
-
-        // Integration
-        auto terminateTurn(const std::string& message) noexcept -> void {
-            updateBoard();
-            displayLossMessage(message);
-        }
-
-
-        // Operation
-        auto displayLossMessage(const std::string& message) const noexcept -> void {
-            if (isGameOver()) {
-                std::cout << message << " hat verloren" << std::endl;
-            }
-        }
 // ----- Implementierungssumpf --------------------------
 
-        auto updateBoard() noexcept -> void {
-            stones_ -= turn_;
+    protected:
+        auto isGameOver() const noexcept -> bool override {
+            return getBoard() < 1;
         }
 
-
-        auto isGameOver() const noexcept -> bool {
-            return stones_ < 1;
+        auto updateBoard()  noexcept -> void override {
+            setBoard(getBoard() - getMove());
         }
 
-        auto isTurnValid() const noexcept -> bool {
-            return turn_ >= 1 && turn_ <= 3;
+        auto isTurnValid() const noexcept -> bool override {
+            return getMove() >= 1 && getMove() <= 3;
         }
+        void prepare() override {
+            write(get_current_player()->getName() + " ist am Zug");
+        }
+
     };
 }
