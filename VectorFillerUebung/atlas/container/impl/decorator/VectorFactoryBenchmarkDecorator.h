@@ -3,7 +3,11 @@
 //
 
 #pragma once
+#include "../../IVectorFactory.h"
 
 
-class VectorFactoryBenchmarkDecorator {
-};
+namespace atlas::container {
+    template<typename T>
+    class VectorFactoryBenchmarkDecorator : public IVectorFactory<T> {
+    };
+}

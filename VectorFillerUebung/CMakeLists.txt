@@ -11,4 +11,5 @@ add_executable(VectorFillerUebung main.cpp
         atlas/client/impl/ClientImpl.h
         atlas/time/impl/StopwatchImpl.h
         atlas/generator/impl/random/MersenneTwisterNumberGenerator.h
-        atlas/generator/impl/generic/GenericGeneratorImpl.h)
+        atlas/generator/impl/generic/GenericGeneratorImpl.h
+        atlas/container/impl/decorator/VectorFactoryBenchmarkDecorator.h)
