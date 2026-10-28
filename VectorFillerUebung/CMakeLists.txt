@@ -5,6 +5,10 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(VectorFillerUebung main.cpp
         atlas/generator/IGenerator.h
+        atlas/generator/IIntGenerator.h
         atlas/time/IStopwatch.h
         atlas/client/IClient.h
-        atlas/client/impl/ClientImpl.h)
+        atlas/client/impl/ClientImpl.h
+        atlas/time/impl/StopwatchImpl.h
+        atlas/generator/impl/random/MersenneTwisterNumberGenerator.h
+        atlas/generator/impl/generic/GenericGeneratorImpl.h)

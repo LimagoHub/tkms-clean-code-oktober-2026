@@ -28,7 +28,7 @@ namespace atlas::client {
         ~VectorClientImpl() override = default;
 
         auto processVector() -> void override {
-            auto v = factory_->createAndFillVector(INT32_MAX / 2);
+            auto v = factory_->createAndFillVector(1000);
             for (int i = 0; i < 3; ++i) {
                 std::cout << v->at(i) << std::endl;
             }
