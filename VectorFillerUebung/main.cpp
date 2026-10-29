@@ -14,7 +14,7 @@ int main() {
     const size_t availableProcessors = std::thread::hardware_concurrency();
     std::cout << availableProcessors << std::endl;
 
-    for (size_t threadCount = 1;threadCount <= availableProcessors+1; ++threadCount) {
+    for (size_t threadCount = 0;threadCount <= availableProcessors+1; ++threadCount) {
         std::cout << "Laufende Threads: " << threadCount << std::endl;
 
         auto generatorFactory = std::make_unique<generator::MersenneTwisterNumberGeneratorFactory>();

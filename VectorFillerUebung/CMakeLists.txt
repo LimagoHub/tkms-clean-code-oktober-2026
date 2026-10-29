@@ -15,4 +15,7 @@ add_executable(VectorFillerUebung main.cpp
         atlas/container/impl/decorator/VectorFactoryBenchmarkDecorator.h
         atlas/container/impl/builder/VectorFactoryBuilder.h
         atlas/container/impl/builder/VectorFactoryBuilder.h
-        atlas/container/impl/parallel/VectorFactoryAutoImpl.h)
+        atlas/container/impl/parallel/VectorFactoryAutoImpl.h
+        atlas/threadpool/thread_pool.hpp
+        atlas/container/impl/parallel/VectorFactoryThreadpoolImpl.h
+        atlas/container/impl/parallel/VectorFactoryThreadpoolLoopImpl.h)

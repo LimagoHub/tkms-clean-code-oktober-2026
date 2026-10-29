@@ -22,7 +22,7 @@ namespace atlas::container {
 
     protected:
         auto fillVector(std::vector<T>& vector) const noexcept -> void override {
-            std::for_each(std::execution::par_unseq, vector.begin(), vector.end(),
+            std::for_each(std::execution::par, vector.begin(), vector.end(),
                 [builder = generatorFactory_.get()](T& value) {
                     thread_local auto generator = builder->create();
                     value = generator->next();

@@ -11,6 +11,7 @@
 
 #include "../sequential/VectorFactorySequentialImpl.h"
 #include "../parallel/VectorFactoryParallelImpl.h"
+#include "../parallel/VectorFactoryAutoImpl.h"
 #include "../decorator/VectorFactoryLoggerDecorator.h"
 #include "../decorator/VectorFactorySecureDecorator.h"
 #include "../decorator/VectorFactoryBenchmarkDecorator.h"
@@ -25,6 +26,13 @@ namespace atlas::container {
 
         public:
         VectorFactoryBuilder() = default;
+
+        /*
+        auto withStrategy(Strategy strategy) -> VectorFactoryBuilder& {
+            strategy_ = strategy;
+            return *this;
+        }
+        */
 
         auto withThreadcount(size_t threadcount) -> VectorFactoryBuilder& {
             threadcount_ = threadcount;
@@ -53,9 +61,21 @@ namespace atlas::container {
     private:
 
         auto createCoreFactory(GeneratorFactoryPtr generatorFactory) -> FactoryPtr {
-            if (threadcount_ > 1)
-                return std::make_unique<VectorFactoryParallelImpl<T>>(std::move(generatorFactory), threadcount_);
-            return std::make_unique<VectorFactorySequentialImpl<T>>(generatorFactory->create());
+
+            switch (threadcount_) {
+                case 0:
+                    return std::make_unique<VectorFactoryAutoImpl<T>>(std::move(generatorFactory));
+
+                case 1:
+                    return std::make_unique<VectorFactorySequentialImpl<T>>(std::move(generatorFactory->create()));
+
+                default:
+                    return std::make_unique<VectorFactoryParallelImpl<T>>(std::move(generatorFactory), threadcount_);
+
+            }
+
+
+
         }
 
         auto applyOptionalDecorators(FactoryPtr factory) -> FactoryPtr {
