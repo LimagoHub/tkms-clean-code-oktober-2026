@@ -1,22 +1,25 @@
-//
-// Created by JoachimWagner on 28.10.2026.
-//
-
 #pragma once
 
+#include <memory>
+#include <utility>
+#include <stdexcept>
+
 #include "../../IVectorFactory.h"
+#include "../../../generator/IGeneratorFactory.h"
 #include "../../../time/IStopwatch.h"
 
-#include "../../../generator/IGeneratorFactory.h"
-
 #include "../sequential/VectorFactorySequentialImpl.h"
-#include "../parallel/VectorFactoryParallelImpl.h"
 #include "../parallel/VectorFactoryAutoImpl.h"
+#include "../parallel/VectorFactoryParallelImpl.h"
+#include "../parallel/VectorFactoryThreadpoolImpl.h"
+#include "../parallel/VectorFactoryThreadpoolLoopImpl.h"
+#include "../decorator/VectorFactoryBenchmarkDecorator.h"
 #include "../decorator/VectorFactoryLoggerDecorator.h"
 #include "../decorator/VectorFactorySecureDecorator.h"
-#include "../decorator/VectorFactoryBenchmarkDecorator.h"
 
 namespace atlas::container {
+
+    enum class Strategy { Sequential, Auto, Parallel, Threadpool, ThreadpoolLoop };
 
     template<class T>
     class VectorFactoryBuilder {
@@ -24,18 +27,16 @@ namespace atlas::container {
         using GeneratorFactoryPtr = std::unique_ptr<generator::IGeneratorFactory<T>>;
         using StopwatchPtr        = std::unique_ptr<time::IStopwatch>;
 
-        public:
+    public:
         VectorFactoryBuilder() = default;
 
-        /*
         auto withStrategy(Strategy strategy) -> VectorFactoryBuilder& {
             strategy_ = strategy;
             return *this;
         }
-        */
 
-        auto withThreadcount(size_t threadcount) -> VectorFactoryBuilder& {
-            threadcount_ = threadcount;
+        auto withThreadCount(size_t count) -> VectorFactoryBuilder& {
+            threadCount_ = count;
             return *this;
         }
 
@@ -55,27 +56,25 @@ namespace atlas::container {
         }
 
         auto build(GeneratorFactoryPtr generatorFactory) -> FactoryPtr {
-            return applyOptionalDecorators(createCoreFactory(std::move(generatorFactory)));
+            auto factory = createBaseStrategy(std::move(generatorFactory));
+            return applyOptionalDecorators(std::move(factory));
         }
 
     private:
-
-        auto createCoreFactory(GeneratorFactoryPtr generatorFactory) -> FactoryPtr {
-
-            switch (threadcount_) {
-                case 0:
-                    return std::make_unique<VectorFactoryAutoImpl<T>>(std::move(generatorFactory));
-
-                case 1:
-                    return std::make_unique<VectorFactorySequentialImpl<T>>(std::move(generatorFactory->create()));
-
-                default:
-                    return std::make_unique<VectorFactoryParallelImpl<T>>(std::move(generatorFactory), threadcount_);
-
+        auto createBaseStrategy(GeneratorFactoryPtr gb) const -> FactoryPtr {
+            switch (strategy_) {
+                case Strategy::Sequential:
+                    return std::make_unique<VectorFactorySequentialImpl<T>>(gb->create());
+                case Strategy::Auto:
+                    return std::make_unique<VectorFactoryAutoImpl<T>>(std::move(gb));
+                case Strategy::Parallel:
+                    return std::make_unique<VectorFactoryParallelImpl<T>>(std::move(gb), threadCount_);
+                case Strategy::Threadpool:
+                    return std::make_unique<VectorFactoryThreadpoolImpl<T>>(std::move(gb), static_cast<uint32_t>(threadCount_));
+                case Strategy::ThreadpoolLoop:
+                    return std::make_unique<VectorFactoryThreadpoolLoopImpl<T>>(std::move(gb), static_cast<uint32_t>(threadCount_));
             }
-
-
-
+            throw std::logic_error{"Unknown strategy"};
         }
 
         auto applyOptionalDecorators(FactoryPtr factory) -> FactoryPtr {
@@ -88,9 +87,11 @@ namespace atlas::container {
             return factory;
         }
 
-        size_t       threadcount_{1};
+        Strategy     strategy_{Strategy::Sequential};
+        size_t       threadCount_{1};
         bool         isLoggingEnabled_{false};
         bool         isSecurityEnabled_{false};
         StopwatchPtr stopwatch_{nullptr};
     };
+
 }
