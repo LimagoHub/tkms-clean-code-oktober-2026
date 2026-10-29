@@ -7,7 +7,10 @@
 #include "../../IVectorFactory.h"
 #include "../../../time/IStopwatch.h"
 
+#include "../../../generator/IGeneratorFactory.h"
+
 #include "../sequential/VectorFactorySequentialImpl.h"
+#include "../parallel/VectorFactoryParallelImpl.h"
 #include "../decorator/VectorFactoryLoggerDecorator.h"
 #include "../decorator/VectorFactorySecureDecorator.h"
 #include "../decorator/VectorFactoryBenchmarkDecorator.h"
@@ -17,13 +20,16 @@ namespace atlas::container {
     template<class T>
     class VectorFactoryBuilder {
         using FactoryPtr          = std::unique_ptr<IVectorFactory<T>>;
-        using GeneratorPtr = std::unique_ptr<generator::IGenerator<T>>;
+        using GeneratorFactoryPtr = std::unique_ptr<generator::IGeneratorFactory<T>>;
         using StopwatchPtr        = std::unique_ptr<time::IStopwatch>;
 
         public:
         VectorFactoryBuilder() = default;
 
-
+        auto withThreadcount(size_t threadcount) -> VectorFactoryBuilder& {
+            threadcount_ = threadcount;
+            return *this;
+        }
 
         auto enableLogging() -> VectorFactoryBuilder& {
             isLoggingEnabled_ = true;
@@ -40,13 +46,17 @@ namespace atlas::container {
             return *this;
         }
 
-        auto build(GeneratorPtr generator) -> FactoryPtr {
-            auto factory = std::make_unique<VectorFactorySequentialImpl<T>>(std::move(generator));
-            return applyOptionalDecorators(std::move(factory));
+        auto build(GeneratorFactoryPtr generatorFactory) -> FactoryPtr {
+            return applyOptionalDecorators(createCoreFactory(std::move(generatorFactory)));
         }
 
     private:
 
+        auto createCoreFactory(GeneratorFactoryPtr generatorFactory) -> FactoryPtr {
+            if (threadcount_ > 1)
+                return std::make_unique<VectorFactoryParallelImpl<T>>(std::move(generatorFactory), threadcount_);
+            return std::make_unique<VectorFactorySequentialImpl<T>>(generatorFactory->create());
+        }
 
         auto applyOptionalDecorators(FactoryPtr factory) -> FactoryPtr {
             if (isSecurityEnabled_)
@@ -58,7 +68,7 @@ namespace atlas::container {
             return factory;
         }
 
-
+        size_t       threadcount_{1};
         bool         isLoggingEnabled_{false};
         bool         isSecurityEnabled_{false};
         StopwatchPtr stopwatch_{nullptr};

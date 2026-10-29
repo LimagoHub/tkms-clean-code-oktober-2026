@@ -4,7 +4,7 @@
 #include "atlas/client/impl/ClientImpl.h"
 #include "atlas/container/impl/builder/VectorFactoryBuilder.h"
 #include "atlas/generator/impl/generic/GenericGeneratorImpl.h"
-#include "atlas/generator/impl/random/MersenneTwisterNumberGenerator.h"
+#include "atlas/generator/impl/random/MersenneTwisterNumberGeneratorFactory.h"
 #include "atlas/time/impl/StopwatchImpl.h"
 
 int main() {
@@ -15,14 +15,16 @@ int main() {
     std::cout << availableProcessors << std::endl;
 
     for (size_t threadCount = 1;threadCount <= availableProcessors+1; ++threadCount) {
-        auto generator = std::make_unique<generator::MersenneTwisterNumberGenerator>();
-        //auto generator = std::make_unique<generator::GenericGeneratorImpl>(0, [](int value) { return value + 5; });
+        std::cout << "Laufende Threads: " << threadCount << std::endl;
+
+        auto generatorFactory = std::make_unique<generator::MersenneTwisterNumberGeneratorFactory>();
 
         auto factory = container::VectorFactoryBuilder<int>{}
+        .withThreadcount(threadCount)
         .withBenchmark(std::make_unique<time::StopwatchImpl>())
         .enableLogging()
         .enableSecurity()
-        .build(std::move(generator));
+        .build(std::move(generatorFactory));
 
         client::VectorClientImpl client{std::move(factory)};
 

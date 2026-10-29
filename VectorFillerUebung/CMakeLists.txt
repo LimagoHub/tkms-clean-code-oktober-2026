@@ -14,4 +14,5 @@ add_executable(VectorFillerUebung main.cpp
         atlas/generator/impl/generic/GenericGeneratorImpl.h
         atlas/container/impl/decorator/VectorFactoryBenchmarkDecorator.h
         atlas/container/impl/builder/VectorFactoryBuilder.h
-        atlas/container/impl/builder/VectorFactoryBuilder.h)
+        atlas/container/impl/builder/VectorFactoryBuilder.h
+        atlas/container/impl/parallel/VectorFactoryAutoImpl.h)
